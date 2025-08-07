@@ -31,12 +31,7 @@ constant/polyMesh/boundary*
 constant/polyMesh/sets
 constant/polyMesh/*
 
-tests/*polyMesh*/points
-tests/*polyMesh*/faces
-tests/*polyMesh*/owner
-tests/*polyMesh*/neighbour
-tests/*polyMesh*/boundary
-tests/*polyMesh*/sets
+tests/*polyMesh*
 
 # Zones and levels
 *Level*
