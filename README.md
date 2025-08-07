@@ -19,4 +19,8 @@ cd pyFOAM_hexBlockMesh
 pip install .
 ```
 
+## Post-Generation Renumbering
+
+The cells are numbered in a column major style. This is not ideal during simulations since the diagonal bandwidth of the matrix A (in `A.x = b`) will be huge. Hence, the `renumberMesh` program in OpenFOAM must be run to optimize performance.
+
 
