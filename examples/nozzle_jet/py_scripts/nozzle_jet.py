@@ -4,8 +4,8 @@ import numpy as np
 
 from scipy.interpolate import CubicHermiteSpline
 
-from pyFOAM_hexBlockMesh.ConnectedHexCollection import \
-ConnectedHexCollection, HexBlock
+from pyFOAM_hexBlockMesh.ConnectedHexCollection import ConnectedHexCollection, HexBlock
+from pyFOAM_hexBlockMesh.FaceCollection import checkBoundaryFaces, checkInteriorFaces
 from pyFOAM_hexBlockMesh.Writer import PointsWriter, FacesWriter
 
 ###################################################################################################
@@ -186,6 +186,20 @@ hex_collection.assignPointIDs()
 
 points	= hex_collection.getPoints()
 faces	= hex_collection.getFaces()
+
+cell_centers = hex_collection.getCellCenters()
+
+for face in faces :
+
+	if face.isBoundary() : 
+		
+		assert checkBoundaryFaces(face, points, cell_centers), \
+		f'Face {face.name} is invalid'
+
+	else :
+
+		assert checkInteriorFaces(face, points, cell_centers), \
+		f'Face {face.name} is invalid'
 
 polyMesh_dir = Path(__file__).parent.parent / 'constant' / 'polyMesh'
 polyMesh_dir.mkdir(parents=True, exist_ok=True)
