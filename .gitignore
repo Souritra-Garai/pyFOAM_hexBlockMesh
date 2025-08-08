@@ -32,6 +32,7 @@ constant/polyMesh/sets
 constant/polyMesh/*
 
 tests/*polyMesh*
+examples/**/polyMesh
 
 # Zones and levels
 *Level*
