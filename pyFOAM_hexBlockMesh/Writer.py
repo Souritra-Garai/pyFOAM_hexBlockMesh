@@ -31,7 +31,7 @@ class PointsWriter :
 		f'Points must be of type float, got {points.dtype}'
 
 		header = PolyMeshFile.getPolyMeshHeader(
-			class_name='pointList',
+			class_name='vectorField',
 			object_name='points',
 			format='ascii',
 			foam_version='13',
