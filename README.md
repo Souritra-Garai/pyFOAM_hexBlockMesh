@@ -25,7 +25,7 @@ The cells are numbered in a column major style. This is not ideal during simulat
 
 ## Example
 
-An example on how to use the library to generate the following mesh is provided in the directory `examples/nozzle_jet`. Certain excerpts from the script `py_scripts/nozzle_jet.py` are illustrated here to demonstrate the features of the library :
+An example on how to use the library to generate the following mesh is provided in the directory [`examples/nozzle_jet`](examples/nozzle_jet). Certain excerpts from the script [`py_scripts/nozzle_jet.py`](examples/nozzle_jet/py_scripts/nozzle_jet.py) are illustrated here to demonstrate the features of the library :
 
 ```python
 # Creating 2 hex blocks with number of cell divisions
@@ -62,3 +62,5 @@ faces_writer	= FacesWriter(polyMesh_dir)
 points_writer.write(points)
 faces_writer.write(faces)
 ```
+![Nozzle Jet Mesh](examples/nozzle_jet/images/py_snapshot.png)
+![Nozzle Jet Mesh](examples/nozzle_jet/images/pz_snapshot.png)
