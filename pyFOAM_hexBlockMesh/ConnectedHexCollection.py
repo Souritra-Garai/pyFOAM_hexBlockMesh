@@ -283,7 +283,7 @@ class ConnectedHexCollection :
 				if not self.isHexFaceConnected(i, face_vertices) :
 					
 					# Hex_1_Face_0123
-					name  = f'Hex_{i}_Face_{''.join(map(str, face_vertices))}'
+					name  = f'Hex_{i}_Face_{"".join(map(str, face_vertices))}'
 
 					faces = FlatFaceCollection(name=name)
 					faces.appendNDFaceCollection(
