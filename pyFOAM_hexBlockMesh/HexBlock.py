@@ -283,9 +283,8 @@ class HexBlock :
 		vertices:tuple[int, int, int, int]
 	) -> np.ndarray :
 		'''
-		Get the coordinates of the points on the face
-		formed by the 4 vertices.
-		Excludes the vertices and the edges.
+		Get the coordinates of the points on the face formed by the 4 vertices.
+		Includes the vertices and points on the edges.
 		'''
 
 		# Check if the input is valid
