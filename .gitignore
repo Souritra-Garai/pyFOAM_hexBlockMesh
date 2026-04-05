@@ -240,3 +240,6 @@ pyrightconfig.json
 
 # VS Code
 .vscode/
+
+# Zed
+.zed/

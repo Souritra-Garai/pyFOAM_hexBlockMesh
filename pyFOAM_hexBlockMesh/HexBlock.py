@@ -6,9 +6,15 @@ import pyFOAM_hexBlockMesh.geometry_utils.HexBlockVertices as HexBlockVertices
 
 from pyFOAM_hexBlockMesh.geometry_utils.CoordinatesOrientation import checkCoordinatesOrientation
 from pyFOAM_hexBlockMesh.FaceCollection import NDFaceCollection
-import warnings
 
 class HexBlock :
+	'''
+	Class to represent a hexahedral block composed of
+	an structured 3D array of hexahedral cells
+	'''
+	cell_ID			: np.ndarray
+	point_ID		: np.ndarray
+	point_coordinates	: np.ndarray
 
 	def __init__(self, n0:int, n1:int, n2:int) -> None :
 		'''
