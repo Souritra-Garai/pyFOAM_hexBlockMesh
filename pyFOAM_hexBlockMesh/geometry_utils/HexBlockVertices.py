@@ -189,7 +189,7 @@ class SurfaceProperties :
 
 		# Check if the input is valid
 		assert len(vertices) == 4, f'Invalid input {vertices}'
-		assert all([isinstance(v, int) for v in vertices]), \
+		assert all([isinstance(v, int) and (v < 8) for v in vertices]), \
 		f'Invalid input {vertices}'
 
 		self.axes		= (
