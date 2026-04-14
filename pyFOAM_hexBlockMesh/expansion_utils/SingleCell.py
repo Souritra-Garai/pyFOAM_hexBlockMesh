@@ -136,7 +136,6 @@ class SingleCell2DGrid :
 	'''
 	cell_ID			: np.ndarray
 	point_ID		: np.ndarray
-	point_coordinates	: np.ndarray
 
 	def __init__(self, n0:int, n1:int) -> None:
 		'''
