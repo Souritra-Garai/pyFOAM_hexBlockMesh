@@ -32,7 +32,7 @@ C:\Users\souri\.virtualenvs\pymesh\Scripts\pip.exe install -e .
 
 ## Architecture
 
-This library generates OpenFOAM polyMesh files from structured hexahedral blocks.
+This library generates OpenFOAM polyMesh files containing structured hexahedral blocks.
 
 ### Core workflow
 
