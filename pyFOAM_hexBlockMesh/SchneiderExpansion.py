@@ -1,11 +1,10 @@
 import numpy as np
 
-import pyFOAM_hexBlockMesh.geometry_utils.HexBlockMap as HexBlockMap
 import pyFOAM_hexBlockMesh.geometry_utils.HexBlockVertices as HexBlockVertices
 
 from pyFOAM_hexBlockMesh.HexBlock import HexBlock
 from pyFOAM_hexBlockMesh.FaceCollection import NDFaceCollection
-from pyFOAM_hexBlockMesh.expansion_utils.SingleCell import SingleCell2DGrid, getInteriorEdgeSlice, getInteriorSurafceSlice5D
+from pyFOAM_hexBlockMesh.expansion_utils.SingleCell import SingleCell2DGrid
 
 class SchneiderExpansionLayer :
 
@@ -28,7 +27,7 @@ class SchneiderExpansionLayer :
 		self.cells_base		= HexBlock(3*n0, 3*n1, 1)
 		self.cells_hat		= SingleCell2DGrid(n0, n1)
 		self.cells_hidden	= SingleCell2DGrid(n0, n1)
-		self.cells_lateral	= (SingleCell2DGrid(n0, n1), SingleCell2DGrid(n0, n1)) 
+		self.cells_lateral	= (SingleCell2DGrid(n0, n1), SingleCell2DGrid(n0, n1))
 
 		pass
 
@@ -96,7 +95,7 @@ class SchneiderExpansionLayer :
 		self.cells_lateral[1].point_ID[:, :, 1, 0, 1] = point_IDs[3::3, :-1:3]
 		self.cells_lateral[1].point_ID[:, :, 0, 1, 1] = point_IDs[2::3, 3::3]
 		self.cells_lateral[1].point_ID[:, :, 1, 1, 1] = point_IDs[3::3, 3::3]
-	
+
 		pass
 
 	def setInternalPointIDs(self, start_ID:int=0) -> int :
@@ -128,8 +127,6 @@ class SchneiderExpansionLayer :
 		# Check if the input is valid
 		assert len(vertices) == 4, 'Invalid input'
 
-		point_IDs = self.cells_base.getSurfacePointIDs(vertices)
-
 		if set(vertices) == set((0, 1, 2, 3)) :
 
 			return self.cells_base.getFaceShape(vertices)
@@ -145,7 +142,7 @@ class SchneiderExpansionLayer :
 		# Check if the input is valid
 		assert vertex in list(range(8)), 'Invalid input'
 
-		return self.cells_base.getVertexPointID(vertex)		
+		return self.cells_base.getVertexPointID(vertex)
 
 	def setVertexPointID(self, vertex:int, point_ID:int) -> None :
 		'''
@@ -189,7 +186,7 @@ class SchneiderExpansionLayer :
 			point_IDs_view = self.cells_base.getEdgePointIDs(v0, v1)[2::3]
 
 			assert point_IDs.shape == point_IDs_view.shape, 'Invalid input'
-			
+
 			point_IDs_view[:] = point_IDs
 
 		else :
@@ -243,7 +240,7 @@ class SchneiderExpansionLayer :
 				self.cells_base.setSurfacePointIDs(vertices, point_IDs)
 
 			case set((4, 5, 6, 7))	:
-				
+
 				point_IDs_view = self.cells_base.getSurfacePointIDs(vertices)
 				point_IDs_view[2::3, 2::3] = point_IDs
 
@@ -260,17 +257,100 @@ class SchneiderExpansionLayer :
 
 				edge_view[mask] = point_IDs
 
-	def getSurface(self, vertices:tuple[int, int, int, int]) -> NDFaceCollection :
+	def getSurface(
+		self,
+		vertices:tuple[int, int, int, int]
+	) -> NDFaceCollection | tuple[NDFaceCollection, NDFaceCollection] :
 		'''
 		Get collection of faces on the surface formed by the 4 vertices.
 		'''
-		raise NotImplementedError
+		match set(vertices) :
 
-	def getInteriorFaces(self) -> tuple[NDFaceCollection, NDFaceCollection, NDFaceCollection] :
+			case set((0, 1, 2, 3)) : return self.cells_base.getSurface(vertices)
+
+			case set((4, 5, 6, 7)) : return self.cells_hat.getSurface(vertices)
+
+			case set((0, 1, 5, 4)) | set((3, 2, 6, 7)) :
+
+				return	self.cells_base.getSurface(vertices), \
+					self.cells_hat.getSurface(vertices)
+
+			case set((0, 3, 7, 4)) :
+
+				return	self.cells_base.getSurface(vertices), \
+					self.cells_lateral[0].getSurface(vertices)
+
+			case set((1, 2, 6, 5)) :
+
+				return	self.cells_base.getSurface(vertices), \
+					self.cells_lateral[1].getSurface(vertices)
+
+			case _ : raise NotImplementedError
+
+	def getInteriorFaces(self) -> tuple[NDFaceCollection, ...] :
 		'''
 		Get the interior faces of the block
 		'''
-		raise NotImplementedError
+
+		face_collections = []
+
+		face_collections.extend(self.cells_base.getInteriorFaces())
+
+		base_faces = self.cells_base.getSurface((4, 5, 6, 7))
+
+		neighbours = np.full_like(base_faces.owner, -1)
+
+		neighbours[::3,  ::3] = self.cells_lateral[0].cell_ID
+		neighbours[::3, 1::3] = self.cells_lateral[0].cell_ID
+		neighbours[::3, 2::3] = self.cells_lateral[0].cell_ID
+
+		neighbours[1::3,  ::3] = self.cells_hidden.cell_ID
+		neighbours[1::3, 1::3] = self.cells_hidden.cell_ID
+		neighbours[1::3, 2::3] = self.cells_hidden.cell_ID
+
+		neighbours[2::3,  ::3] = self.cells_lateral[1].cell_ID
+		neighbours[2::3, 1::3] = self.cells_lateral[1].cell_ID
+		neighbours[2::3, 2::3] = self.cells_lateral[1].cell_ID
+
+		base_faces.assignNeighbour(neighbours)
+
+		face_collections.append(base_faces)
+
+		interior_lateral_0_hidden = self.cells_lateral[0].getAllFaces((1, 2, 6, 5))
+		interior_lateral_0_hidden.assignNeighbour(self.cells_hidden.cell_ID)
+
+		face_collections.append(interior_lateral_0_hidden)
+
+		interior_hidden_lateral_1 = self.cells_hidden.getAllFaces((1, 2, 6, 5))
+		interior_hidden_lateral_1.assignNeighbour(self.cells_lateral[1].cell_ID)
+
+		face_collections.append(interior_hidden_lateral_1)
+
+		interior_lateral_1_lateral_0 = self.cells_lateral[1].getAllFaces((1, 2, 6, 5))
+		interior_lateral_1_lateral_0.owner = interior_lateral_1_lateral_0.owner[:-1, :]
+		interior_lateral_1_lateral_0.vertices = interior_lateral_1_lateral_0.vertices[:-1, :, :]
+		interior_lateral_1_lateral_0.assignNeighbour(self.cells_lateral[0].cell_ID[1:, :])
+
+		face_collections.append(interior_lateral_1_lateral_0)
+
+		interior_lateral_0_hat = self.cells_lateral[0].getAllFaces((4, 5, 6, 7))
+		interior_lateral_0_hat.assignNeighbour(self.cells_hat.cell_ID)
+
+		face_collections.append(interior_lateral_0_hat)
+
+		interior_hat_lateral_1 = self.cells_hat.getAllFaces((4, 5, 6, 7))
+		interior_hat_lateral_1.assignNeighbour(self.cells_lateral[1].cell_ID)
+
+		face_collections.append(interior_hat_lateral_1)
+
+		interior_hat_hat = self.cells_hat.getAllFaces((2, 6, 7, 3))
+		interior_hat_hat.owner = interior_hat_hat.owner[:, :-1]
+		interior_hat_hat.vertices = interior_hat_hat.vertices[:, :-1, :]
+		interior_hat_hat.assignNeighbour(self.cells_hat.cell_ID[:, 1:])
+
+		face_collections.append(interior_hat_hat)
+
+		return tuple(face_collections)
 
 	def setPointCoordinates(
 		self,
@@ -297,4 +377,3 @@ class SchneiderExpansionLayer :
 		Excludes the vertices and the edges.
 		'''
 		raise NotImplementedError
-
