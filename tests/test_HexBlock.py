@@ -6,7 +6,7 @@ import pyFOAM_hexBlockMesh.HexBlock as HexBlock
 
 from pyFOAM_hexBlockMesh.geometry_utils.HexBlockMap import vertex_connectivity, hex_face_vertices
 
-def setUpBlock(block:HexBlock.HexBlock) :
+def setUpBlock(block : HexBlock.HexBlock) :
 	'''
 	Set up the point IDs of a 3x3x3 HexBlock
 	'''
@@ -80,7 +80,7 @@ class TestHexBlock(unittest.TestCase) :
 			[[ 1, 10, 19], [ 4, 13, 22], [ 7, 16, 25]],
 			[[ 2, 11, 20], [ 5, 14, 23], [ 8, 17, 26]]
 		])
-			
+
 		np.testing.assert_array_equal(block.point_ID, expected_point_ID)
 
 		pass
@@ -121,7 +121,7 @@ class TestHexBlock(unittest.TestCase) :
 		expected_surface_point_IDs = np.array([[15]])
 
 		np.testing.assert_array_equal(surface_point_IDs, expected_surface_point_IDs)
-		
+
 		pass
 
 	def test_getSurface(self) :
@@ -144,7 +144,7 @@ class TestHexBlock(unittest.TestCase) :
 
 		np.testing.assert_array_equal(surface.owner, expected_surface_owner)
 		np.testing.assert_array_equal(surface.vertices, expected_surface_vertices)
-		
+
 		pass
 
 	def test_getInteriorFaces_1(self) :
@@ -239,22 +239,22 @@ class TestHexBlock(unittest.TestCase) :
 		block = HexBlock.HexBlock(2, 3, 2)
 
 		block.setCellIDs(start_ID=0)
-		
+
 		point_ID = 0
-		
+
 		for v in range(8) :
-			
+
 			block.setVertexPointID(v, point_ID)
 			point_ID += 1
 
 		for vertex_pair in vertex_connectivity.keys() :
-			
+
 			n = block.getEdgePointIDs(vertex_pair[0], vertex_pair[1]).size
 			block.setEdgePointIDs(*vertex_pair, np.arange(point_ID, point_ID + n))
 			point_ID += n
 
 		for surface_vertices in hex_face_vertices :
-			
+
 			shape = block.getSurfacePointIDs(surface_vertices).shape
 			n = np.prod(shape, dtype=int)
 			block.setSurfacePointIDs(surface_vertices, np.arange(point_ID, point_ID + n).reshape(shape))
@@ -269,7 +269,7 @@ class TestHexBlock(unittest.TestCase) :
 				[12, 30, 18],
 				[13, 31, 19],
 				[ 3, 23,  7],
-				
+
 			],
 			[
 				[ 8, 28, 11],
@@ -456,7 +456,7 @@ class TestHexBlock(unittest.TestCase) :
 					[1.0, 2.0, 2.5],
 					[1.0, 2.0, 3.0],
 				],
-			], 
+			],
 		])
 
 		np.testing.assert_array_equal(block.point_coordinates, expected_coordinates)
@@ -489,6 +489,7 @@ class TestHexBlock(unittest.TestCase) :
 		'''
 		Test the setPointCoordinates and getCellCenterCoordinates methods
 		'''
+
 		block = HexBlock.HexBlock(2, 2, 2)
 
 		block.setCellIDs(start_ID=0)
@@ -554,7 +555,7 @@ class TestHexBlock(unittest.TestCase) :
 					[1.0, 2.0, 2.5],
 					[1.0, 2.0, 3.0],
 				],
-			], 
+			],
 		])
 
 		np.testing.assert_array_equal(block.point_coordinates, expected_coordinates)
@@ -590,5 +591,5 @@ class TestHexBlock(unittest.TestCase) :
 
 
 if __name__ == '__main__' :
-	
+
 	unittest.main()
