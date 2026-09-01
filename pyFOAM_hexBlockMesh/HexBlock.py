@@ -10,13 +10,14 @@ from pyFOAM_hexBlockMesh.FaceCollection import NDFaceCollection
 class HexBlock :
 	'''
 	Class to represent a hexahedral block composed of
-	an structured 3D array of hexahedral cells
+	a structured 3D array of hexahedral cells
 	'''
+
 	cell_ID			: np.ndarray
 	point_ID		: np.ndarray
 	point_coordinates	: np.ndarray
 
-	def __init__(self, n0:int, n1:int, n2:int) -> None :
+	def __init__(self, n0 : int, n1 : int, n2 : int) -> None :
 		'''
 		n0, n1, n2: Number of cells along each axis
 		'''
@@ -42,7 +43,7 @@ class HexBlock :
 
 		pass
 
-	def setCellIDs(self, start_ID:int=0) -> int :
+	def setCellIDs(self, start_ID : int=0) -> int :
 		'''
 		Set the cell IDs
 		start_ID: Starting ID for the cells
@@ -61,10 +62,10 @@ class HexBlock :
 			start_ID,
 			start_ID + num_cells
 		).reshape(cells_shape, order='F')
-		
+
 		return start_ID + int(num_cells)
 
-	def setInternalPointIDs(self, start_ID:int=0) -> int :
+	def setInternalPointIDs(self, start_ID : int=0) -> int :
 		'''
 		Set the point IDs for the internal points
 		'''
@@ -88,7 +89,7 @@ class HexBlock :
 
 		return start_ID + int(num_points)
 
-	def getFaceShape(self, vertices:tuple) -> tuple :
+	def getFaceShape(self, vertices : tuple) -> tuple :
 		'''
 		Get the shape (cells) of the face
 		'''
@@ -101,12 +102,12 @@ class HexBlock :
 		shape = (self.cell_ID.shape[ax0], self.cell_ID.shape[ax1])
 
 		return shape
-	
-	def getVertexPointID(self, vertex:int) -> int :
+
+	def getVertexPointID(self, vertex : int) -> int :
 		'''
 		Get the point ID of the vertex
 		'''
-		
+
 		# Check if the input is valid
 		assert vertex in list(range(8)), 'Invalid input'
 
@@ -115,7 +116,7 @@ class HexBlock :
 
 		return point_ID
 
-	def setVertexPointID(self, vertex:int, point_ID:int) -> None :
+	def setVertexPointID(self, vertex : int, point_ID : int) -> None :
 		'''
 		Set the point ID of the vertex
 		'''
@@ -128,12 +129,12 @@ class HexBlock :
 		point_index = HexBlockMap.vertex_map[vertex]
 
 		assert self.point_ID[point_index] == -1, 'Point ID is already set'
-		
+
 		self.point_ID[point_index] = point_ID
 
 		pass
 
-	def getEdgePointIDs(self, v0:int, v1:int) -> np.ndarray :
+	def getEdgePointIDs(self, v0 : int, v1 : int) -> np.ndarray :
 		'''
 		Get the IDs of points along the edge
 		from v0 to v1.
@@ -144,8 +145,8 @@ class HexBlock :
 		point_IDs	= slice_3d.getArrayView(self.point_ID)
 
 		return point_IDs
-	
-	def setEdgePointIDs(self, v0:int, v1:int, point_IDs:np.ndarray) -> None :
+
+	def setEdgePointIDs(self, v0 : int, v1 : int, point_IDs : np.ndarray) -> None :
 		'''
 		Set the IDs of points along the edge
 		from v0 to v1.
@@ -166,7 +167,7 @@ class HexBlock :
 
 		pass
 
-	def getSurfacePointIDs(self, vertices:tuple[int, int, int, int]) -> np.ndarray :
+	def getSurfacePointIDs(self, vertices : tuple[int, int, int, int]) -> np.ndarray :
 		'''
 		Get the IDs of points on the face formed by the 4 vertices.
 		Excludes the vertices and the edges.
@@ -183,8 +184,8 @@ class HexBlock :
 
 	def setSurfacePointIDs(
 		self,
-		vertices:tuple[int, int, int, int],
-		point_IDs:np.ndarray
+		vertices : tuple[int, int, int, int],
+		point_IDs : np.ndarray
 	) -> None :
 		'''
 		Set the IDs of points on the face formed by the 4 vertices.
@@ -207,7 +208,7 @@ class HexBlock :
 
 		pass
 
-	def getSurface(self, vertices:tuple[int, int, int, int]) -> NDFaceCollection :
+	def getSurface(self, vertices : tuple[int, int, int, int]) -> NDFaceCollection :
 		'''
 		Get collection of faces on the surface
 		formed by the 4 vertices.
@@ -233,23 +234,20 @@ class HexBlock :
 		face_collections = []
 
 		for ax in range(3) :
-			
+
 			face_slices = HexBlockFaces.getInteriorFaces(ax)
 
 			face_owners	= face_slices.getOwner(self.cell_ID)
 			face_vertices	= face_slices.getVertices(self.point_ID)
 			face_neighbors	= face_slices.getNeighbor(self.cell_ID)
-			
+
 			faces = NDFaceCollection(face_owners, face_vertices, face_neighbors)
 
 			face_collections.append(faces)
 
 		return tuple(face_collections)
 
-	def setPointCoordinates(
-		self,
-		coordinates:np.ndarray
-	) -> None :
+	def setPointCoordinates(self, coordinates : np.ndarray) -> None :
 		'''
 		Set the coordinates of the points
 		'''
@@ -284,10 +282,7 @@ class HexBlock :
 
 		return cell_centers
 
-	def getSurfacePointCoordinates(
-		self,
-		vertices:tuple[int, int, int, int]
-	) -> np.ndarray :
+	def getSurfacePointCoordinates(self, vertices : tuple[int, int, int, int]) -> np.ndarray :
 		'''
 		Get the coordinates of the points on the face formed by the 4 vertices.
 		Includes the vertices and points on the edges.
@@ -300,4 +295,3 @@ class HexBlock :
 		point_coordinates = slice_3d.getArrayView(self.point_coordinates)
 
 		return point_coordinates
-	

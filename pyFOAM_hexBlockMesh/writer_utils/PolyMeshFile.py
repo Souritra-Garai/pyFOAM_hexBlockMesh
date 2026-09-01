@@ -3,7 +3,7 @@ from pathlib import Path
 file_separator	= '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //'
 file_EOF	= '// ************************************************************************* //'
 
-def getHeader(version: str) -> str:
+def getHeader(version : str) -> str :
 	'''
 	Return the OpenFOAM file header.
 	'''
@@ -19,7 +19,7 @@ f'''/*--------------------------------*- C++ -*---------------------------------
 '''
 	return file_header
 
-def getDictionaryString(input_dict: dict, indent: int = 0) -> str:
+def getDictionaryString(input_dict : dict, indent : int=0) -> str :
 	'''
 	Write a dictionary to the specified file path with proper indentation.
 	'''
@@ -34,7 +34,7 @@ def getDictionaryString(input_dict: dict, indent: int = 0) -> str:
 
 	for key, value in input_dict.items() :
 
-		if isinstance(value, dict):
+		if isinstance(value, dict) :
 
 			return_string += '\t' * indent + f'{key:<{max_key_length}}\n'
 			return_string += '\t' * indent + '{\n'
@@ -45,7 +45,7 @@ def getDictionaryString(input_dict: dict, indent: int = 0) -> str:
 
 			if n > 1 : return_string += '\n'
 
-		else:
+		else :
 			return_string += '\t' * indent + f'{key:<{max_key_length}}\t{value};\n'
 
 		n -= 1
@@ -53,25 +53,25 @@ def getDictionaryString(input_dict: dict, indent: int = 0) -> str:
 	return return_string
 
 def getPolyMeshHeader(
-	class_name: str,
-	object_name: str,
-	format: str = 'ascii',
-	foam_version: str = '13',
-	file_version: str| None = None,
+	class_name	: str,
+	object_name	: str,
+	file_format	: str	= 'ascii',
+	foam_version	: str	= '13',
+	file_version	: str | None = None,
 ) -> str :
 	'''
 	Return the OpenFOAM PolyMesh header.
 	'''
 
 	file_dict = {
-		'format'	: format,
+		'format'	: file_format,
 		'class'		: class_name,
 		'location'	: '"constant/polyMesh"',
 		'object'	: object_name,
 	}
 
 	if file_version is not None :
-		
+
 		file_dict['version'] = file_version
 
 	header = getHeader(foam_version)

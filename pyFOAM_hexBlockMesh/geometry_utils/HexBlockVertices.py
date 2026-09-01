@@ -8,21 +8,21 @@ def verticesShareFaceAlongAxis(vertices:tuple[int, int, int, int], axis:int) -> 
 	'''
 	Check if the vertices share a face along the axis
 	'''
-	
+
 	flag = True
 
 	try :
 
 		axis_val = vertex_map[vertices[0]][axis]
-		
+
 		for v in vertices[1:] :
-		
+
 			flag = flag and (vertex_map[v][axis] == axis_val)
 
 	except IndexError:
 
 		raise ValueError('Invalid input')
-	
+
 	return flag
 
 @dataclass
@@ -70,7 +70,7 @@ class Slice3D :
 		points_view = points_view[tuple(self.slices)]
 
 		return points_view
-	
+
 @dataclass
 class AxisProperties :
 	'''
@@ -91,33 +91,33 @@ class AxisProperties :
 		# to check if the swapped ordered pairs are in the dictionary
 		# If not, raise an error
 		if (v0, v1) in vertex_connectivity :
-			
+
 			# If the ordered pair is in the dictionary
 			# The edge is along the axis
 			# and the orientation is positive
 			self.dimension		= vertex_connectivity[(v0, v1)]
 			self.orientation	= True
-		
-		elif (v1, v0) in vertex_connectivity  :
-			
+
+		elif (v1, v0) in vertex_connectivity :
+
 			# If the swapped ordered pair is in the dictionary
 			# The edge is along the axis
 			# and the orientation is negative
 			self.dimension		= vertex_connectivity[(v1, v0)]
 			self.orientation	= False
-		
-		else :	
-			
+
+		else :
+
 			if v0 in range(8) and v1 in range(8) :
 
 				raise ValueError('Vertices are not connected')
-			
+
 			else :
-			
+
 				raise ValueError('Invalid input')
-			
+
 		pass
-	
+
 	def getSlice(self) -> slice :
 		'''
 		Get the slice according to the orientation
@@ -134,16 +134,16 @@ class AxisProperties :
 		'''
 
 		match self.orientation :
-			
+
 			case True	: return slice(1, -1)
 			case False	: return slice(-2, 0, -1)
-	
+
 def getEdgeInteriorSlice(v0:int, v1:int) -> Slice3D :
 	'''
 	Get the slice of the points array for the edge.
 	Excludes the end vertices.
 	'''
-	
+
 	axis = AxisProperties(v0, v1)
 
 	slice_3d = Slice3D()
@@ -152,7 +152,7 @@ def getEdgeInteriorSlice(v0:int, v1:int) -> Slice3D :
 	slice_3d.slices[0]	= axis.getInteriorSlice()
 
 	remaining_axes = list({0, 1, 2} - {axis.dimension})
-	
+
 	slice_3d.axes[1]	= remaining_axes[0]
 	slice_3d.slices[1]	= vertex_map[v0][remaining_axes[0]]
 
@@ -201,7 +201,7 @@ class SurfaceProperties :
 
 		assert verticesShareFaceAlongAxis(vertices, self.constant_axis),	\
 		'Vertices do not share a face'
-		
+
 		self.constant_axis_index = vertex_map[vertices[0]][self.constant_axis]
 
 		pass
@@ -210,12 +210,13 @@ def getSurfaceInteriorSlice(vertices:tuple[int, int, int, int]) -> Slice3D :
 	'''
 	Get the points on the surface excluding the vertices and edges
 	'''
+
 	surface		= SurfaceProperties(vertices)
 	surface_slice	= Slice3D()
 
 	surface_slice.axes[0]	= surface.axes[0].dimension
 	surface_slice.slices[0]	= surface.axes[0].getInteriorSlice()
-	
+
 	surface_slice.axes[1]	= surface.axes[1].dimension
 	surface_slice.slices[1]	= surface.axes[1].getInteriorSlice()
 
@@ -234,7 +235,7 @@ def getSurfaceCompleteSlice(vertices:tuple[int, int, int, int]) -> Slice3D :
 
 	surface_slice.axes[0]	= surface.axes[0].dimension
 	surface_slice.slices[0]	= surface.axes[0].getSlice()
-	
+
 	surface_slice.axes[1]	= surface.axes[1].dimension
 	surface_slice.slices[1]	= surface.axes[1].getSlice()
 

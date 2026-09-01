@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from pyFOAM_hexBlockMesh.ConnectedHexCollection import ConnectedHexCollection, HexBlock
@@ -9,12 +10,12 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		'''
 		Test the addHexBlock method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block = HexBlock(2, 2, 2)
 
-		index = collection.addHexBlock(hex_block)
+		collection.addHexBlock(hex_block)
 
 		pass
 
@@ -22,9 +23,9 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		'''
 		Test the connectHexBlocks method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block1 = HexBlock(2, 2, 2)
 		hex_block2 = HexBlock(2, 2, 2)
 
@@ -48,7 +49,7 @@ class TestConnectedHexCollection(unittest.TestCase) :
 			index1, index2,
 			(1, 2, 6, 5),
 			(0, 3, 7, 4)
-		)	
+		)
 
 		pass
 
@@ -56,9 +57,9 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		'''
 		Test the assignCellIDs method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block1 = HexBlock(2, 2, 2)
 		hex_block2 = HexBlock(2, 2, 2)
 
@@ -88,16 +89,16 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		num_cells = collection.assignCellIDs()
 
 		self.assertEqual(num_cells, 16)
-		
+
 		pass
 
 	def test_assignHexVertexPointIDs(self) :
 		'''
 		Test the assignHexVertexPointIDs method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block1 = HexBlock(2, 2, 2)
 		hex_block2 = HexBlock(2, 2, 2)
 
@@ -134,9 +135,9 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		'''
 		Test the getFaces method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block1 = HexBlock(2, 2, 2)
 		hex_block2 = HexBlock(2, 2, 2)
 
@@ -176,9 +177,9 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		'''
 		Test the getPoints method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block1 = HexBlock(2, 2, 2)
 		hex_block2 = HexBlock(2, 2, 2)
 
@@ -218,9 +219,9 @@ class TestConnectedHexCollection(unittest.TestCase) :
 		'''
 		Test the getCellCenters method
 		'''
-		
+
 		collection = ConnectedHexCollection()
-		
+
 		hex_block1 = HexBlock(2, 2, 2)
 		hex_block2 = HexBlock(2, 2, 2)
 
@@ -256,7 +257,7 @@ class TestConnectedHexCollection(unittest.TestCase) :
 
 		pass
 
+
 if __name__ == '__main__' :
-	
+
 	unittest.main()
-		

@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from pyFOAM_hexBlockMesh.HexBlock import HexBlock
@@ -8,7 +9,7 @@ def setUpHexBlocks() -> list[HexBlock] :
 	'''
 	Set up a list of hex blocks for testing
 	'''
-	
+
 	hex_blocks = [
 		HexBlock(2, 2, 2),
 		HexBlock(2, 2, 2)
@@ -19,6 +20,9 @@ def setUpHexBlocks() -> list[HexBlock] :
 class TestConnectInfo(unittest.TestCase) :
 
 	def test_isHexFaceConnected(self) :
+		'''
+		Test the isHexFaceConnected method
+		'''
 
 		hex_blocks = setUpHexBlocks()
 		connect_info = ConnectInfo(
@@ -65,13 +69,13 @@ class TestConnectInfo(unittest.TestCase) :
 			hex_blocks[0].getVertexPointID(3)
 		)
 
-		pass		
+		pass
 
 	def test_assignEdgePointIDs(self) :
 		'''
 		Test the assignEdgePointIDs method
 		'''
-		
+
 		hex_blocks = setUpHexBlocks()
 		connect_info = ConnectInfo(
 			0, 1,
@@ -106,7 +110,7 @@ class TestConnectInfo(unittest.TestCase) :
 
 		for j0 in range(4) :
 			j1 = (j0 + 1) % 4
-			
+
 			edge_IDs_0 = hex_blocks[0].getEdgePointIDs(
 				connect_info.face_vertices_0[j0],
 				connect_info.face_vertices_0[j1]
@@ -161,7 +165,7 @@ class TestConnectInfo(unittest.TestCase) :
 			0, 1,
 			(0, 1, 2, 3), (4, 5, 6, 7)
 		)
-		
+
 		point_ID = connect_info.assignVertexPointIDs(hex_blocks)
 		point_ID = connect_info.assignEdgePointIDs(hex_blocks, point_ID)
 		point_ID = connect_info.assignFacePointIDs(hex_blocks, point_ID)
@@ -210,6 +214,7 @@ class TestConnectInfo(unittest.TestCase) :
 
 		pass
 
-if __name__ == '__main__':
-		
+
+if __name__ == '__main__' :
+
 	unittest.main()

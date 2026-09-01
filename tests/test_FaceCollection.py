@@ -1,10 +1,11 @@
 import unittest
+
 import numpy as np
 
 from pyFOAM_hexBlockMesh.FaceCollection import (
-	NDFaceCollection, 
-	FlatFaceCollection, 
-	checkInteriorFaces, 
+	NDFaceCollection,
+	FlatFaceCollection,
+	checkInteriorFaces,
 	checkBoundaryFaces
 )
 
@@ -83,6 +84,8 @@ class TestFaceCollection(unittest.TestCase) :
 		self.assertTrue(np.array_equal(faces_combined.owner, expected_owner))
 		self.assertTrue(np.array_equal(faces_combined.vertices, expected_vertices))
 
+		pass
+
 	def test_appendFlatFaceCollection(self) :
 		'''
 		Test the append method for FlatFaceCollection
@@ -120,6 +123,8 @@ class TestFaceCollection(unittest.TestCase) :
 
 		self.assertTrue(np.array_equal(faces_combined.owner, expected_owner))
 		self.assertTrue(np.array_equal(faces_combined.vertices, expected_vertices))
+
+		pass
 
 	def test_checkInteriorFaces(self) :
 		'''
@@ -164,13 +169,16 @@ class TestFaceCollection(unittest.TestCase) :
 		faces.neighbour = np.array([1], dtype=int)
 
 		is_interior = checkInteriorFaces(faces, points, cell_centers)
-		
+
 		self.assertTrue(is_interior)
+
+		pass
 
 	def test_checkBoundaryFaces(self) :
 		'''
 		Test the checkBoundaryFaces method
 		'''
+
 		points = np.array([
 			[0, 0, 0], # 0
 			[1, 0, 0], # 1
@@ -210,11 +218,13 @@ class TestFaceCollection(unittest.TestCase) :
 		], dtype=int)
 		# faces.neighbour = np.array([1], dtype=int)
 
-		is_interior = checkBoundaryFaces(faces, points, cell_centers)
-		
-		self.assertTrue(is_interior)
+		is_boundary = checkBoundaryFaces(faces, points, cell_centers)
+
+		self.assertTrue(is_boundary)
+
+		pass
 
 
 if __name__ == '__main__' :
-	
+
 	unittest.main()
