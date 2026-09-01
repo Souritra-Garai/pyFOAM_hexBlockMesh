@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+
 import pyFOAM_hexBlockMesh.geometry_utils.HexBlockFaces as HexBlockFaces
 
 class TestHexBlockFaces(unittest.TestCase) :
@@ -14,7 +15,7 @@ class TestHexBlockFaces(unittest.TestCase) :
 		point_IDs	= np.arange(27).reshape((3, 3, 3))
 
 		face_slices	= HexBlockFaces.FaceSlices()
-		
+
 		owner		= face_slices.getOwner(cell_IDs)
 		neighbor	= face_slices.getNeighbor(cell_IDs)
 		vertices	= face_slices.getVertices(point_IDs)
@@ -126,7 +127,7 @@ class TestHexBlockFaces(unittest.TestCase) :
 		np.testing.assert_array_equal(vertices, expected_vertices)
 
 		pass
-	
+
 	def test_getInteriorFaces_2(self) :
 		'''
 		Test the getInteriorFaces function with a different set of vertices
@@ -195,6 +196,9 @@ class TestHexBlockFaces(unittest.TestCase) :
 		np.testing.assert_array_equal(neighbor, expected_neighbor)
 		np.testing.assert_array_equal(vertices, expected_vertices)
 
+		pass
+
+
 if __name__ == '__main__' :
-	
+
 	unittest.main()
