@@ -1,17 +1,20 @@
+import unittest
 from pathlib import Path
 
-import unittest
 import numpy as np
 
-from pyFOAM_hexBlockMesh.ConnectedHexCollection import \
-ConnectedHexCollection, HexBlock
+from pyFOAM_hexBlockMesh.ConnectedHexCollection import ConnectedHexCollection, HexBlock
 from pyFOAM_hexBlockMesh.FaceCollection import checkInteriorFaces, checkBoundaryFaces
 from pyFOAM_hexBlockMesh.Writer import PointsWriter, FacesWriter
 
 def setUpOGrid() -> ConnectedHexCollection :
+	'''
+	Set up a butterfly O-grid: a center block surrounded by
+	4 blocks along the positive/negative x/y directions
+	'''
 
 	center_block = HexBlock(2, 2, 2)
-	pos_x_block = HexBlock(2, 2, 2)	
+	pos_x_block = HexBlock(2, 2, 2)
 	pos_y_block = HexBlock(2, 2, 2)
 	neg_x_block = HexBlock(2, 2, 2)
 	neg_y_block = HexBlock(2, 2, 2)
@@ -124,6 +127,9 @@ def setUpOGrid() -> ConnectedHexCollection :
 class TestOGrid(unittest.TestCase) :
 
 	def test_setup(self) -> None :
+		'''
+		Test that the O-grid can be set up without errors
+		'''
 
 		setUpOGrid()
 
@@ -142,7 +148,7 @@ class TestOGrid(unittest.TestCase) :
 		faces = hex_collection.getFaces()
 
 		for face_collection in faces :
-			
+
 			if face_collection.isBoundary() :
 
 				self.assertTrue(checkBoundaryFaces(
@@ -156,8 +162,8 @@ class TestOGrid(unittest.TestCase) :
 				))
 
 		test_path = Path('test_polyMesh_OGrid')
-		if test_path.exists():
-			for item in test_path.iterdir():
+		if test_path.exists() :
+			for item in test_path.iterdir() :
 				item.unlink()
 			test_path.rmdir()
 		test_path.mkdir(parents=True, exist_ok=True)
@@ -170,8 +176,7 @@ class TestOGrid(unittest.TestCase) :
 
 		pass
 
-	
+
 if __name__ == '__main__' :
-		
+
 	unittest.main()
-	
