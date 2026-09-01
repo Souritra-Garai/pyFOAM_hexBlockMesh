@@ -1,8 +1,6 @@
 import numpy as np
 
-def checkCoordinatesOrientation(
-	coordinates:np.ndarray
-	) -> bool :
+def checkCoordinatesOrientation(coordinates : np.ndarray) -> bool :
 	'''
 	Check if the coordinates are oriented correctly.
 	Coordinates are considered to have a right handed orientation
