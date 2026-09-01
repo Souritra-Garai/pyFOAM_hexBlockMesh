@@ -34,7 +34,7 @@ class Slice2D :
 
 		return flag
 
-	def getCellsView(self, cells:np.ndarray) -> np.ndarray :
+	def getCellsView(self, cells : np.ndarray) -> np.ndarray :
 		'''
 		Get the array view of the points array
 		'''
@@ -50,7 +50,7 @@ class Slice2D :
 
 		return points_view
 
-	def getPointsView(self, points:np.ndarray, vertex) -> np.ndarray :
+	def getPointsView(self, points : np.ndarray, vertex : int) -> np.ndarray :
 		'''
 		Get the array view of the points array
 		'''
@@ -63,11 +63,11 @@ class Slice2D :
 		# Get the array view of the points array
 		points_view = np.moveaxis(points, self.axes, (0, 1))
 		points_view = points_view[tuple(self.slices) + \
-			    		  HexBlockMap.vertex_map[vertex]]
+			HexBlockMap.vertex_map[vertex]]
 
 		return points_view
 
-def getSurfaceSlice(vertices:tuple[int, int, int, int]) -> Slice2D :
+def getSurfaceSlice(vertices : tuple[int, int, int, int]) -> Slice2D :
 
 	surface = HexBlockVertices.SurfaceProperties(vertices)
 
@@ -94,10 +94,11 @@ class SingleCell2DGrid :
 	Class to represent 2D array of cells
 	where the vertices do not co-incide with neighbouring cells
 	'''
+
 	cell_ID			: np.ndarray
 	point_ID		: np.ndarray
 
-	def __init__(self, n0:int, n1:int) -> None:
+	def __init__(self, n0 : int, n1 : int) -> None :
 		'''
 		n0, n1: number of cells along each axis
 		'''
@@ -111,7 +112,7 @@ class SingleCell2DGrid :
 
 		pass
 
-	def setCellIDs(self, start_ID:int=0) -> int :
+	def setCellIDs(self, start_ID : int=0) -> int :
 		'''
 		Set the cell IDs
 		start_ID: Starting ID for the cells
@@ -133,7 +134,7 @@ class SingleCell2DGrid :
 
 		return start_ID + int(num_cells)
 
-	def getFaceShape(self, vertices:tuple[int, int, int, int]) -> tuple[int, int] :
+	def getFaceShape(self, vertices : tuple[int, int, int, int]) -> tuple[int, int] :
 		'''
 		Get the shape (cells) of the face
 		'''
@@ -149,7 +150,11 @@ class SingleCell2DGrid :
 
 		return shape
 
-	def getSurface(self, vertices:tuple[int, int, int, int]) -> NDFaceCollection :
+	def getSurface(self, vertices : tuple[int, int, int, int]) -> NDFaceCollection :
+		'''
+		Get collection of faces on the surface
+		formed by the 4 vertices.
+		'''
 
 		surface_slice = getSurfaceSlice(vertices)
 
@@ -161,7 +166,7 @@ class SingleCell2DGrid :
 
 		return NDFaceCollection(cells, face_points)
 
-	def getAllFaces(self, vertices:tuple[int, int, int, int]) -> NDFaceCollection :
+	def getAllFaces(self, vertices : tuple[int, int, int, int]) -> NDFaceCollection :
 
 		face_points	= np.stack([
 			self.point_ID[:, :][HexBlockMap.vertex_map[vertex]]
