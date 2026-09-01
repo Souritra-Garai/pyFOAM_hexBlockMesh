@@ -2,6 +2,54 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Motivation
+
+OpenFOAM's native meshing tools (`blockMesh`, `snappyHexMesh`) have no way to place mesh points by
+an arbitrary rule — e.g. a cylindrically axisymmetric nozzle whose cross-sectional area changes along
+its axis, meshed with a butterfly O-grid. `pyFOAM_hexBlockMesh` fills that gap: every point coordinate
+is specified explicitly via numpy, structured hex blocks are stitched together by matching their shared
+faces, and the result is written directly to OpenFOAM's `polyMesh` format. It is a low-level primitive
+library (blocks + face-merging + ID assignment), not a parametric mesher — geometry-specific logic
+(e.g. butterfly O-grid nozzles) is built on top by the calling script.
+
+## Status: SchneiderExpansionLayer (active work, as of 2026-08-17)
+
+`SchneiderExpansionLayer` (`SchneiderExpansion.py`) is a generic, nozzle-independent building block —
+not specific to the nozzle use case above. It's one layer of hex cells with a single coarse square
+face exposed on top and a 3×3 grid of fine square faces exposed on the bottom (Schneider 1-to-9
+octree refinement). It's composed of a `cells_base` `HexBlock` (3n0 × 3n1 × 1) plus four
+`SingleCell2DGrid` groups — `cells_hat`, `cells_hidden`, `cells_lateral[0]`, `cells_lateral[1]` —
+that sit above the base and taper the 9 fine faces up to the 1 coarse face.
+
+**Implemented + tested:**
+- Cell ID assignment (`setCellIDs`)
+- Vertex / edge point-ID get/set on the base block, with correct delegation for hat-face vertices/edges
+- `setUpSingleCellGridPoints` — wires shared point IDs between `cells_base`'s boundary and the hat/
+  hidden/lateral grids (worth a second look: a couple of assignment lines in the `cells_lateral[0]`
+  and `cells_lateral[1]` blocks look like accidental copy/paste duplicates — not yet confirmed as a bug)
+
+**Implemented, not yet tested:**
+- `getInteriorFaces` — stitches together the internal faces between base/hat/hidden/lateral cells
+- `setPointCoordinates(face_0, height)` — sets coordinates for `cells_base`'s 2 stored axis-2 layers
+  (z=0 and z=height) from a given fine-resolution face array
+- `getPointsL0`..`getPointsL3` — accessors for the 4 conceptual height levels (see gap below)
+
+**Known gap — coordinate assignment above the base layer:** `cells_base` only physically stores 2
+axis-2 layers, but the Schneider template has 4 height levels, and the hat/hidden/lateral
+`SingleCell2DGrid` groups hold no coordinates of their own. Intended scheme (confirmed with the
+project owner, not yet implemented): the 4 levels sit at 0, 0.33, 0.67, and 1.0 of the layer height.
+`getPointsL1`–`L3` as currently written only slice `cells_base.point_coordinates`, which doesn't have
+those extra layers — so they are placeholders pending this.
+
+**Not implemented:** `getCellCenterCoordinates`, `getSurfacePointCoordinates` (`raise NotImplementedError`).
+
+**`LateralFace.py` (new, untracked):** an M-shaped cross-section face that joins two
+`SchneiderExpansionLayer` instances side-by-side along the layer's own lateral axes 0 and 1 (not the
+nozzle axis — layers are nozzle-agnostic). Implements vertex/edge/interior-surface/hat-top point-ID
+get/set across the same 4 height levels, mirroring the `ConnectInfo` pattern. No coordinate handling
+yet, no tests yet. Confirmed next step: wire it into `SchneiderExpansionLayer` /
+`ConnectedHexCollection`'s connection cascade.
+
 ## Commands
 
 **Run all tests:**
@@ -33,6 +81,9 @@ C:\Users\souri\.virtualenvs\pymesh\Scripts\pip.exe install -e .
 ## Architecture
 
 This library generates OpenFOAM polyMesh files containing structured hexahedral blocks.
+See `docs/ARCHITECTURE.md` for the fuller walkthrough (shape conventions, the vertex/edge/
+face abstraction, the ID-assignment cascade, and the `SingleCell2DGrid` expansion-layer
+pattern) — the summary below is the condensed version.
 
 ### Core workflow
 
