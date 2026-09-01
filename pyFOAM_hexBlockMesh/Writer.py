@@ -7,7 +7,7 @@ import pyFOAM_hexBlockMesh.writer_utils.PolyMeshFile as PolyMeshFile
 
 class PointsWriter :
 
-	def __init__(self, polyMesh_path: Path) :
+	def __init__(self, polyMesh_path : Path) :
 
 		assert polyMesh_path.exists() and polyMesh_path.is_dir(), \
 		f'PolyMesh_path {polyMesh_path} does not exist or is not a directory'
@@ -19,7 +19,7 @@ class PointsWriter :
 
 		pass
 
-	def write(self, points: np.ndarray) -> None :
+	def write(self, points : np.ndarray) -> None :
 		'''
 		Write points to the points file.
 		'''
@@ -33,7 +33,7 @@ class PointsWriter :
 		header = PolyMeshFile.getPolyMeshHeader(
 			class_name='vectorField',
 			object_name='points',
-			format='ascii',
+			file_format='ascii',
 			foam_version='13',
 		)
 
@@ -55,7 +55,7 @@ class PointsWriter :
 
 class FacesWriter :
 
-	def __init__(self, polyMesh_path: Path) :
+	def __init__(self, polyMesh_path : Path) :
 
 		assert polyMesh_path.exists() and polyMesh_path.is_dir(), \
 		f'PolyMesh_path {polyMesh_path} does not exist or is not a directory'
@@ -80,7 +80,7 @@ class FacesWriter :
 
 		pass
 
-	def __writeFaces(self, faces: np.ndarray) -> None :
+	def __writeFaces(self, faces : np.ndarray) -> None :
 		'''
 		Write faces to the faces file.
 		'''
@@ -94,7 +94,7 @@ class FacesWriter :
 		header = PolyMeshFile.getPolyMeshHeader(
 			class_name='faceList',
 			object_name='faces',
-			format='ascii',
+			file_format='ascii',
 			foam_version='13',
 		)
 
@@ -114,7 +114,7 @@ class FacesWriter :
 
 		pass
 
-	def __writeOwner(self, owner: np.ndarray) -> None :
+	def __writeOwner(self, owner : np.ndarray) -> None :
 		'''
 		Write owner to the owner file.
 		'''
@@ -128,7 +128,7 @@ class FacesWriter :
 		header = PolyMeshFile.getPolyMeshHeader(
 			class_name='labelList',
 			object_name='owner',
-			format='ascii',
+			file_format='ascii',
 			foam_version='13',
 		)
 
@@ -148,7 +148,7 @@ class FacesWriter :
 
 		pass
 
-	def __writeNeighbour(self, neighbour: np.ndarray) -> None :
+	def __writeNeighbour(self, neighbour : np.ndarray) -> None :
 		'''
 		Write neighbour to the neighbour file.
 		'''
@@ -162,7 +162,7 @@ class FacesWriter :
 		header = PolyMeshFile.getPolyMeshHeader(
 			class_name='labelList',
 			object_name='neighbour',
-			format='ascii',
+			file_format='ascii',
 			foam_version='13',
 		)
 
@@ -182,7 +182,7 @@ class FacesWriter :
 
 		pass
 
-	def __writeBoundary(self, boundary: dict) -> None :
+	def __writeBoundary(self, boundary : dict) -> None :
 		'''
 		Write boundary to the boundary file.
 		'''
@@ -207,8 +207,8 @@ class FacesWriter :
 
 		boundary_string += ')\n\n'
 
-		with open(self.path_boundary, 'w') as f:
-			
+		with open(self.path_boundary, 'w') as f :
+
 			f.write(header + boundary_string + PolyMeshFile.file_EOF + '\n')
 
 		assert self.path_boundary.exists(), \
@@ -216,8 +216,10 @@ class FacesWriter :
 
 		pass
 
-	def __organizeFaces(self, face_list: list[FaceCollection.FlatFaceCollection]) \
-	-> tuple[FaceCollection.FlatFaceCollection, dict] :
+	def __organizeFaces(
+		self,
+		face_list : list[FaceCollection.FlatFaceCollection]
+	) -> tuple[FaceCollection.FlatFaceCollection, dict] :
 		'''
 		Organize faces into a FaceCollection.
 		'''
@@ -227,7 +229,7 @@ class FacesWriter :
 
 		assert \
 		all(isinstance(face, FaceCollection.FlatFaceCollection) for face in face_list), \
-		f'All elements in face_list must be FlatFaceCollection instances'
+		'All elements in face_list must be FlatFaceCollection instances'
 
 		# Sort all faces such that boundary face collections are at the end
 		face_list.sort(key=lambda x: x.isBoundary())
@@ -264,7 +266,7 @@ class FacesWriter :
 		# Return the organized face collections
 		return all_faces, boundary_dict
 
-	def write(self, face_list: list[FaceCollection.FlatFaceCollection]) -> None :
+	def write(self, face_list : list[FaceCollection.FlatFaceCollection]) -> None :
 		'''
 		Write faces to the faces, owner, neighbour, and boundary files.
 		'''
@@ -274,7 +276,7 @@ class FacesWriter :
 
 		assert \
 		all(isinstance(face, FaceCollection.FlatFaceCollection) for face in face_list), \
-		f'All elements in face_list must be FlatFaceCollection instances'
+		'All elements in face_list must be FlatFaceCollection instances'
 
 		all_faces, boundary_dict = self.__organizeFaces(face_list)
 
@@ -285,4 +287,3 @@ class FacesWriter :
 		self.__writeBoundary(boundary_dict)
 
 		pass
-	

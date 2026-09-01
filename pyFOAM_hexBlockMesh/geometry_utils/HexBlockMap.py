@@ -4,7 +4,7 @@
 
 #  0 represents start of an array
 # -1 represents end of an array
-# For a (n0, n1, n2, ...) points array named hex_A, 
+# For a (n0, n1, n2, ...) points array named hex_A,
 # hex_A[vertex_map[i]] represents the vertex i
 vertex_map = (
 	( 0, 0, 0),	# 0

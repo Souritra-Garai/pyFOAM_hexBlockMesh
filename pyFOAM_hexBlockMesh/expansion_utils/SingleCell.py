@@ -1,20 +1,13 @@
-from dataclasses import dataclass
-
 import numpy as np
 
 import pyFOAM_hexBlockMesh.geometry_utils.HexBlockVertices as HexBlockVertices
 import pyFOAM_hexBlockMesh.geometry_utils.HexBlockMap as HexBlockMap
 
-@dataclass
-class Slice5D :
-	'''
-	Slice of a 5D array.
-	Used for SingleCell2DGrid point_ID arrays of shape (n0, n1, 2, 2, 2),
-	where axes 0-1 are the cell-grid dimensions and axes 2-4 are the local
-	hex-vertex dimensions (analogous to Slice3D for HexBlock).
+from pyFOAM_hexBlockMesh.FaceCollection import NDFaceCollection
 
-	Only axes 0 and 1 (cell-grid) can interchange via the axes field.
-	Axes 2-4 (local vertex) are always fixed and addressed directly by slices[2-4].
+class Slice2D :
+	'''
+	Slice of a 2D array
 	'''
 
 	slices	: list[slice|int]
@@ -22,10 +15,10 @@ class Slice5D :
 
 	def __init__(self) -> None :
 		'''
-		Initialize the 5D slice
+		Initialize the surface slice
 		'''
 
-		self.slices	= [slice(None)] * 5
+		self.slices	= [slice(None)] * 2
 		self.axes	= [0, 1]
 
 		pass
@@ -36,109 +29,76 @@ class Slice5D :
 		'''
 
 		flag = set(self.axes) == {0, 1}
-		flag = flag and len(self.slices) == 5 and len(self.axes) == 2
+		flag = flag and len(self.slices) == 2 and len(self.axes) == 2
 		flag = flag and all([isinstance(s, (int, slice)) for s in self.slices])
 
 		return flag
 
-	def getArrayView(self, points:np.ndarray) -> np.ndarray :
+	def getCellsView(self, cells : np.ndarray) -> np.ndarray :
 		'''
-		Get the array view of the 5D (or higher) points array.
-		Only axes 0 and 1 are reordered via moveaxis; axes 2-4 are indexed directly.
+		Get the array view of the points array
 		'''
 
-		assert isinstance(points, np.ndarray)
+		# Check if the input is valid
+		assert isinstance(cells, np.ndarray)
 		assert self.isValid(), 'Invalid slice'
-		assert points.ndim >= 5, 'Invalid input'
+		assert cells.ndim >= 2, 'Invalid input'
 
-		points_view = np.moveaxis(points, self.axes, (0, 1))
+		# Get the array view of the points array
+		points_view = np.moveaxis(cells, self.axes, (0, 1))
 		points_view = points_view[tuple(self.slices)]
 
 		return points_view
 
-def getInteriorSlice(vertex:int, axis:HexBlockVertices.AxisProperties) -> slice :
-	'''
-	Returns a slice for an axis based on the vertex
-	if vertex[axis]=0 and axis is oriented along positive direction
-	then interior slice would be slice(1, None) to exclude the starting point
-	'''
+	def getPointsView(self, points : np.ndarray, vertex : int) -> np.ndarray :
+		'''
+		Get the array view of the points array
+		'''
 
-	# Check if the input is valid
-	assert vertex in range(8), 'Invalid input: vertex must be in range(8)'
-	assert isinstance(axis, HexBlockVertices.AxisProperties), \
-	'Invalid input: axis must be an AxisProperties instance'
+		# Check if the input is valid
+		assert isinstance(points, np.ndarray)
+		assert self.isValid(), 'Invalid slice'
+		assert points.ndim >= 5, 'Invalid input'
 
-	match (HexBlockMap.vertex_map[vertex][axis.dimension], axis.orientation) :
+		# Get the array view of the points array
+		points_view = np.moveaxis(points, self.axes, (0, 1))
+		points_view = points_view[tuple(self.slices) + \
+			HexBlockMap.vertex_map[vertex]]
 
-		# start of axis, forward direction → skip first (boundary) point
-		case ( 0, True)		: return slice(1, None)
-		# end of axis, forward direction → skip last (boundary) point
-		case (-1, True)		: return slice(0, -1)
-		# start of axis, backward direction → reverse traversal, stop before first point
-		case ( 0, False)	: return slice(-1, 0, -1)
-		# end of axis, backward direction → reverse traversal, skip last (boundary) point
-		case (-1, False)	: return slice(-2, None, -1)
-		# Raise error when no match
-		case _			: raise \
-		ValueError('Unexpected combination: ' \
-		f'vertex_map={HexBlockMap.vertex_map[vertex][axis.dimension]}, ' \
-		f'orientation={axis.orientation}')
+		return points_view
 
-def getInteriorEdgeSlice(vertex:int, axis:HexBlockVertices.AxisProperties) -> Slice5D :
-	'''
-	Returns a 5D Slice for obtaining specified vertex
-	along all interior edge cells of the specified axis
-	'''
+def getSurfaceSlice(vertices : tuple[int, int, int, int]) -> Slice2D :
 
-	# Check if the input is valid
-	assert vertex in range(8), 'Invalid input: vertex must be in range(8)'
-	assert isinstance(axis, HexBlockVertices.AxisProperties), \
-	'Invalid input: axis must be an AxisProperties instance'
-	assert axis.dimension in (0, 1), \
-	'Invalid input: axis dimension must be 0 or 1 for SingleCell2DGrid'
+	surface = HexBlockVertices.SurfaceProperties(vertices)
 
-	vertex_slice				= Slice5D()
-	vertex_slice.slices[2:]			= HexBlockMap.vertex_map[vertex]
-	vertex_slice.slices[axis.dimension]	= getInteriorSlice(vertex, axis)
+	surface_slice = Slice2D()
 
-	return vertex_slice
+	surface_slice.axes[0]	= surface.axes[0].dimension
+	surface_slice.slices[0]	= surface.axes[0].getSlice()
 
-def getInteriorSurafceSlice5D(vertex:int, axes:tuple[HexBlockVertices.AxisProperties, ...]) -> Slice5D :
-	'''
-	Returns a 5D Slice to obtain the specified vertex
-	of the interior cells on the specified surface
-	'''
+	surface_slice.axes[1]	= surface.axes[1].dimension
+	surface_slice.slices[1]	= surface.axes[1].getSlice()
 
-	# Check if the input is valid
-	assert vertex in range(8), 'Invalid input: vertex must be in range(8)'
-	assert len(axes) == 2 and \
-	all(isinstance(ax, HexBlockVertices.AxisProperties) for ax in axes), \
-	'Invalid input: axes must be a sequence of exactly 2 AxisProperties instances'
-	assert axes[0].dimension in (0, 1) and axes[1].dimension in (0, 1), \
-	'Invalid input: both axis dimensions must be 0 or 1 for SingleCell2DGrid'
-	assert axes[0].dimension != axes[1].dimension, \
-	'Invalid input: axes must span different dimensions'
+	if surface.constant_axis != 2 :
 
-	vertex_slice = Slice5D()
+		index				= surface_slice.axes.index(2)
 
-	vertex_slice.axes[0] = axes[0].dimension
-	vertex_slice.axes[1] = axes[1].dimension
+		surface_slice.axes[index]	= surface.constant_axis
+		surface_slice.slices[index]	= surface.constant_axis_index
 
-	vertex_slice.slices[0] = getInteriorSlice(vertex, axes[0])
-	vertex_slice.slices[1] = getInteriorSlice(vertex, axes[1])
+	return surface_slice
 
-	return vertex_slice
 
 class SingleCell2DGrid :
 	'''
 	Class to represent 2D array of cells
 	where the vertices do not co-incide with neighbouring cells
 	'''
+
 	cell_ID			: np.ndarray
 	point_ID		: np.ndarray
-	point_coordinates	: np.ndarray
 
-	def __init__(self, n0:int, n1:int) -> None:
+	def __init__(self, n0 : int, n1 : int) -> None :
 		'''
 		n0, n1: number of cells along each axis
 		'''
@@ -149,11 +109,10 @@ class SingleCell2DGrid :
 
 		self.cell_ID		= np.full((n0, n1), -1, dtype=int)
 		self.point_ID		= np.full((n0, n1, 2, 2, 2), -1, dtype=int)
-		self.point_coordinates	= np.zeros((n0, n1, 2, 2, 2, 3), dtype=float)
 
 		pass
 
-	def setCellIDs(self, start_ID:int=0) -> int :
+	def setCellIDs(self, start_ID : int=0) -> int :
 		'''
 		Set the cell IDs
 		start_ID: Starting ID for the cells
@@ -175,7 +134,7 @@ class SingleCell2DGrid :
 
 		return start_ID + int(num_cells)
 
-	def getFaceShape(self, vertices:tuple[int, int, int, int]) -> tuple[int, int] :
+	def getFaceShape(self, vertices : tuple[int, int, int, int]) -> tuple[int, int] :
 		'''
 		Get the shape (cells) of the face
 		'''
@@ -191,27 +150,27 @@ class SingleCell2DGrid :
 
 		return shape
 
-	def getPointIDs(self, point_slice: Slice5D) -> np.ndarray :
+	def getSurface(self, vertices : tuple[int, int, int, int]) -> NDFaceCollection :
 		'''
-		Returns a view of the point IDs
-		'''
-
-		# Check if the input is valid
-		assert isinstance(point_slice, Slice5D), 'Invalid input'
-
-		return point_slice.getArrayView(self.point_ID)
-	
-	def setPointIDs(self, point_slice:Slice5D, point_IDs:np.ndarray) -> None :
-		'''
-		Sets the point IDs to the specified slice of point IDs array
+		Get collection of faces on the surface
+		formed by the 4 vertices.
 		'''
 
-		# Check if the input is valid
-		assert isinstance(point_slice, Slice5D), 'Invalid input'
-		assert isinstance(point_IDs, np.ndarray) and point_IDs.dtype == int, \
-		'Invalid input'
+		surface_slice = getSurfaceSlice(vertices)
 
-		point_IDs_view		= point_slice.getArrayView(self.point_ID)
-		point_IDs_view[:]	= point_IDs
+		cells		= surface_slice.getCellsView(self.cell_ID)
+		face_points	= np.stack([
+			surface_slice.getPointsView(self.point_ID, vertex) \
+			for vertex in vertices
+		], axis=-1)
 
-		pass
+		return NDFaceCollection(cells, face_points)
+
+	def getAllFaces(self, vertices : tuple[int, int, int, int]) -> NDFaceCollection :
+
+		face_points	= np.stack([
+			self.point_ID[:, :][HexBlockMap.vertex_map[vertex]]
+			for vertex in vertices
+		], axis=-1)
+
+		return NDFaceCollection(self.cell_ID, face_points)

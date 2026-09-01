@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+
 import pyFOAM_hexBlockMesh.geometry_utils.HexBlockVertices as HexBlockVertices
 
 def getBlock() -> np.ndarray :
@@ -28,7 +29,7 @@ class TestHexBlockVertices(unittest.TestCase) :
 		slice_3d = HexBlockVertices.Slice3D()
 		slice_3d.slices	= [slice(0, 2), slice(0, 2), slice(0, 2)]
 		slice_3d.axes	= [0, 1, 2]
-		
+
 		view = slice_3d.getArrayView(block)
 
 		expected_view = np.array([
@@ -143,7 +144,7 @@ class TestHexBlockVertices(unittest.TestCase) :
 
 		slice_3d	= HexBlockVertices.getSurfaceCompleteSlice((0, 1, 5, 4))
 		surface		= slice_3d.getArrayView(block)
-		
+
 		expected_surface = np.array([
 			[ 1,  2,  3],
 			[13, 14, 15]
@@ -175,6 +176,6 @@ class TestHexBlockVertices(unittest.TestCase) :
 		pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__' :
 
 	unittest.main()

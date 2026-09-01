@@ -1,32 +1,28 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
+requires	= ["setuptools>=45", "wheel"]
+build-backend	= "setuptools.build_meta"
 
 [project]
-name = "pyFOAM_hexBlockMesh"
+name	= "pyFOAM_hexBlockMesh"
 version = "0.1.0"
-description = "A Python package for creating hex block meshes for OpenFOAM"
-readme = "README.md"
-requires-python = ">=3.6"
+readme	= "README.md"
 authors = [
-    {name = "Souritra Garai"},
+	{name	= "Souritra Garai"},
 ]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: POSIX :: Linux",
+description	= "A Python package for creating hex block meshes for OpenFOAM"
+requires-python = ">=3.6"
+classifiers	= [
+	"Programming Language :: Python :: 3",
+	"Operating System :: POSIX :: Linux",
 ]
-dependencies = [
-    "numpy",
+dependencies	= [
+	"numpy",
 ]
 
 [project.urls]
-Homepage = "https://github.com/Souritra-Garai/pyFOAM_hexBlockMesh"
-Repository = "https://github.com/Souritra-Garai/pyFOAM_hexBlockMesh"
-
-[project.scripts]
-# Add command line scripts here if needed
-# example-script = "pyFOAM_hexBlockMesh.module:function"
+Homepage	= "https://github.com/Souritra-Garai/pyFOAM_hexBlockMesh"
+Repository	= "https://github.com/Souritra-Garai/pyFOAM_hexBlockMesh"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["pyFOAM_hexBlockMesh*"]
+where	= ["."]
+include	= ["pyFOAM_hexBlockMesh*"]

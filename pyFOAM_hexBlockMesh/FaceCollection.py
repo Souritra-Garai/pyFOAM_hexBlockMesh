@@ -1,9 +1,9 @@
 import numpy as np
 
 def isValid(
-	owner:np.ndarray,
-	vertices:np.ndarray,
-	neighbour:np.ndarray|None=None
+	owner : np.ndarray,
+	vertices : np.ndarray,
+	neighbour : np.ndarray|None=None
 ) -> bool :
 	'''
 	Check if the face collection is valid
@@ -26,12 +26,12 @@ class NDFaceCollection :
 	'''
 	Collection of quadrilateral faces
 	'''
-	
+
 	def __init__(
 		self,
-		owner:np.ndarray,
-		vertices:np.ndarray,
-		neighbour:np.ndarray|None=None
+		owner : np.ndarray,
+		vertices : np.ndarray,
+		neighbour : np.ndarray|None=None
 	) -> None :
 		'''
 		Initialize the face
@@ -66,8 +66,8 @@ class NDFaceCollection :
 		face_shape = self.owner.shape
 
 		return face_shape
-	
-	def assignNeighbour(self, neighbour:np.ndarray) -> None :
+
+	def assignNeighbour(self, neighbour : np.ndarray) -> None :
 		'''
 		Assign the neighbour
 		'''
@@ -84,30 +84,30 @@ class NDFaceCollection :
 		'''
 		Flatten the face collection
 		'''
-		
+
 		# Create the indices that map the face collection to a 1D array
-		# Flatten order 'F' => 
+		# Flatten order 'F' =>
 		# indices are parsed fastest along axis 0, then axis 1, then axis 2
 		indices = [index.flatten(order='F') for index in np.indices(self.getShape())]
 		indices = tuple(indices)
-		
+
 		owner		= self.owner[indices]
 		# Using the same indices ensures that
 		# the vertices are also flattened in the same order
 		vertices	= self.vertices[indices]
-		
+
 		if self.neighbour is None : neighbour = None
-		else :	neighbour = self.neighbour[indices]
+		else : neighbour = self.neighbour[indices]
 
 		return NDFaceCollection(owner, vertices, neighbour)
 
-			
+
 class FlatFaceCollection :
 	'''
 	1D Collection of quadrilateral faces
 	'''
-	
-	def __init__(self, name:str='Wall') -> None :
+
+	def __init__(self, name : str='Wall') -> None :
 		'''
 		Initialize the face
 		'''
@@ -150,7 +150,7 @@ class FlatFaceCollection :
 		size = self.owner.shape[0]
 
 		return size
-	
+
 	def isBoundary(self) -> bool :
 		'''
 		Check if the face collection is a boundary
@@ -162,8 +162,8 @@ class FlatFaceCollection :
 		flag = self.getSize() > 0 and self.neighbour.size == 0
 
 		return flag
-	
-	def appendNDFaceCollection(self, faces:NDFaceCollection) -> None :
+
+	def appendNDFaceCollection(self, faces : NDFaceCollection) -> None :
 		'''
 		Append a face collection
 		'''
@@ -185,12 +185,12 @@ class FlatFaceCollection :
 			if flag_self_is_boundary :
 
 				raise ValueError('Cannot append internal faces to boundary')
-			
+
 			self.neighbour = np.append(self.neighbour, faces_flattened.neighbour)
 
 		pass
 
-	def appendFlatFaceCollection(self, faces:'FlatFaceCollection') -> None :
+	def appendFlatFaceCollection(self, faces : 'FlatFaceCollection') -> None :
 		'''
 		Append a flat face collection
 		'''
@@ -212,8 +212,8 @@ class FlatFaceCollection :
 		self.vertices = np.append(self.vertices, faces.vertices, axis=0)
 
 		pass
-	
-def mergeFaceCollections(face_collections:list[FlatFaceCollection]) -> FlatFaceCollection :
+
+def mergeFaceCollections(face_collections : list[FlatFaceCollection]) -> FlatFaceCollection :
 	'''
 	Merge multiple face collections into one
 	'''
@@ -234,9 +234,9 @@ def mergeFaceCollections(face_collections:list[FlatFaceCollection]) -> FlatFaceC
 	return merged_faces
 
 def checkInteriorFaces(
-	face_collection:FlatFaceCollection,
-	points:np.ndarray,
-	cell_centers:np.ndarray,
+	face_collection : FlatFaceCollection,
+	points : np.ndarray,
+	cell_centers : np.ndarray,
 ) -> bool :
 	'''
 	Check if the face collection is interior
@@ -268,9 +268,9 @@ def checkInteriorFaces(
 	return bool(flag)
 
 def checkBoundaryFaces(
-	face_collection:FlatFaceCollection,
-	points:np.ndarray,
-	cell_centers:np.ndarray,
+	face_collection : FlatFaceCollection,
+	points : np.ndarray,
+	cell_centers : np.ndarray,
 ) -> bool :
 	'''
 	Check if the face collection is boundary

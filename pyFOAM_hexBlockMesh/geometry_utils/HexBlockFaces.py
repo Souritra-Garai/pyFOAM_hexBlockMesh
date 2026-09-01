@@ -39,7 +39,7 @@ class FaceSlices :
 		assert point_IDs.ndim == 3, \
 		f'Invalid number of dimensions. Expected 3D array. Got {point_IDs.ndim}D'
 
-		# The point IDs are ordered according to 2 axes values 
+		# The point IDs are ordered according to 2 axes values
 		# and their orientations (Covering all 8 ways to order the points)
 		points_view = self.vertices.getArrayView(point_IDs)
 
@@ -51,7 +51,7 @@ class FaceSlices :
 		), axis=-1)
 
 		return vertices
-	
+
 	def getOwner(self, cell_IDs:np.ndarray) -> np.ndarray :
 		'''
 		Get the owner of the face
@@ -62,7 +62,7 @@ class FaceSlices :
 		owner = self.owner.getArrayView(cell_IDs)
 
 		return owner
-	
+
 	def getNeighbor(self, cell_IDs:np.ndarray) -> np.ndarray :
 		'''
 		Get the neighbor of the face
@@ -141,4 +141,4 @@ def getInteriorFaces(axis:int) -> FaceSlices :
 	slices.vertices.slices[2]	= slice(1, -1)
 
 	return slices
-	
+

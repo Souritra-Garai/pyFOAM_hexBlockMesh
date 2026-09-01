@@ -140,25 +140,29 @@ class TestSchneiderExpansionLayer_GetFaceShape(unittest.TestCase) :
 		shape = self.layer.getFaceShape((4, 5, 6, 7))
 		self.assertEqual(shape, (2, 3))
 
-	def test_lateral_face_ax1_raises(self) :
-		# (0,1,5,4): constant axis 1 → RuntimeError
-		with self.assertRaises(RuntimeError) :
-			self.layer.getFaceShape((0, 1, 5, 4))
+	def test_lateral_face_ax1_shape(self) :
+		# (0,1,5,4): constant ax1, edges along ax0 and ax2
+		# cells_hat.cell_shape = (n0, n1, 1) → shape (cell_shape[0], cell_shape[2]) = (n0, 1)
+		shape = self.layer.getFaceShape((0, 1, 5, 4))
+		self.assertEqual(shape, (2, 1))
 
-	def test_lateral_face_ax0_raises(self) :
-		# (0,4,7,3): constant axis 0 → RuntimeError
-		with self.assertRaises(RuntimeError) :
-			self.layer.getFaceShape((0, 4, 7, 3))
+	def test_lateral_face_ax0_shape(self) :
+		# (0,4,7,3): constant ax0, edges along ax2 then ax1
+		# cells_hat.cell_shape = (n0, n1, 1) → shape (cell_shape[2], cell_shape[1]) = (1, n1)
+		shape = self.layer.getFaceShape((0, 4, 7, 3))
+		self.assertEqual(shape, (1, 3))
 
-	def test_lateral_face_ax1_other_raises(self) :
-		# (2,3,7,6): constant axis 1 → RuntimeError
-		with self.assertRaises(RuntimeError) :
-			self.layer.getFaceShape((2, 3, 7, 6))
+	def test_lateral_face_ax1_other_shape(self) :
+		# (2,3,7,6): constant ax1, edges along ax0 and ax2
+		# cells_hat.cell_shape = (n0, n1, 1) → shape (cell_shape[0], cell_shape[2]) = (n0, 1)
+		shape = self.layer.getFaceShape((2, 3, 7, 6))
+		self.assertEqual(shape, (2, 1))
 
-	def test_lateral_face_ax0_other_raises(self) :
-		# (1,2,6,5): constant axis 0 → RuntimeError
-		with self.assertRaises(RuntimeError) :
-			self.layer.getFaceShape((1, 2, 6, 5))
+	def test_lateral_face_ax0_other_shape(self) :
+		# (1,2,6,5): constant ax0, edges along ax1 then ax2
+		# cells_hat.cell_shape = (n0, n1, 1) → shape (cell_shape[1], cell_shape[2]) = (n1, 1)
+		shape = self.layer.getFaceShape((1, 2, 6, 5))
+		self.assertEqual(shape, (3, 1))
 
 
 class TestSchneiderExpansionLayer_SetVertexPointID(unittest.TestCase) :
@@ -193,59 +197,9 @@ class TestSchneiderExpansionLayer_SetVertexPointID(unittest.TestCase) :
 		for grid in self.layer.cells_lateral :
 			self.assertEqual(grid.point_ID[0, 0, 0, 0, 0], -1)
 
-	# --- hat-layer vertices (4–7): cells_base + cells_hat + one cells_lateral ---
-
 	def test_hat_vertex_v4_sets_cells_base(self) :
 		self.layer.setVertexPointID(4, 55)
 		self.assertEqual(self.layer.getVertexPointID(4), 55)
-
-	def test_hat_vertex_v4_sets_cells_hat(self) :
-		# v4=(0,0,-1) → cells_hat.point_ID[0,0,0,0,-1]
-		self.layer.setVertexPointID(4, 55)
-		self.assertEqual(self.layer.cells_hat.point_ID[0, 0, 0, 0, -1], 55)
-
-	def test_hat_vertex_v4_sets_lateral0(self) :
-		# v4: point_index[1]=0 → cells_lateral[0]
-		self.layer.setVertexPointID(4, 55)
-		self.assertEqual(self.layer.cells_lateral[0].point_ID[0, 0, 0, 0, -1], 55)
-
-	def test_hat_vertex_v4_does_not_set_lateral1(self) :
-		self.layer.setVertexPointID(4, 55)
-		self.assertEqual(self.layer.cells_lateral[1].point_ID[0, 0, 0, 0, -1], -1)
-
-	def test_hat_vertex_v5_sets_cells_hat(self) :
-		# v5=(-1,0,-1) → cells_hat.point_ID[-1,0,-1,0,-1]
-		self.layer.setVertexPointID(5, 66)
-		self.assertEqual(self.layer.cells_hat.point_ID[-1, 0, -1, 0, -1], 66)
-
-	def test_hat_vertex_v5_sets_lateral0(self) :
-		# v5: point_index[1]=0 → cells_lateral[0]
-		self.layer.setVertexPointID(5, 66)
-		self.assertEqual(self.layer.cells_lateral[0].point_ID[-1, 0, -1, 0, -1], 66)
-
-	def test_hat_vertex_v6_sets_cells_hat(self) :
-		# v6=(-1,-1,-1) → cells_hat.point_ID[-1,-1,-1,-1,-1]
-		self.layer.setVertexPointID(6, 77)
-		self.assertEqual(self.layer.cells_hat.point_ID[-1, -1, -1, -1, -1], 77)
-
-	def test_hat_vertex_v6_sets_lateral1(self) :
-		# v6: point_index[1]=-1 → cells_lateral[1]
-		self.layer.setVertexPointID(6, 77)
-		self.assertEqual(self.layer.cells_lateral[1].point_ID[-1, -1, -1, -1, -1], 77)
-
-	def test_hat_vertex_v6_does_not_set_lateral0(self) :
-		self.layer.setVertexPointID(6, 77)
-		self.assertEqual(self.layer.cells_lateral[0].point_ID[-1, -1, -1, -1, -1], -1)
-
-	def test_hat_vertex_v7_sets_cells_hat(self) :
-		# v7=(0,-1,-1) → cells_hat.point_ID[0,-1,0,-1,-1]
-		self.layer.setVertexPointID(7, 88)
-		self.assertEqual(self.layer.cells_hat.point_ID[0, -1, 0, -1, -1], 88)
-
-	def test_hat_vertex_v7_sets_lateral1(self) :
-		# v7: point_index[1]=-1 → cells_lateral[1]
-		self.layer.setVertexPointID(7, 88)
-		self.assertEqual(self.layer.cells_lateral[1].point_ID[0, -1, 0, -1, -1], 88)
 
 	def test_hat_vertex_double_set_raises(self) :
 		self.layer.setVertexPointID(4, 55)
@@ -379,72 +333,193 @@ class TestSchneiderExpansionLayer_SetEdgePointIDs(unittest.TestCase) :
 		self.layer.setEdgePointIDs(3, 7, ids)
 		np.testing.assert_array_equal(self.layer.getEdgePointIDs(3, 7), ids)
 
+
+class TestSchneiderExpansionLayer_SetUpSingleCellGridPoints(unittest.TestCase) :
+	'''
+	cells_base = HexBlock(6, 9, 1) for n0=2, n1=3
+	point_IDs = cells_base.point_ID[:, :, -1]  shape (7, 10)
+
+	Filled with np.arange(70).reshape(7, 10) so point_IDs[i, j] = i + 7*j
+
+	Index sets used by the method
+	  axis-0 (7 elements): 1::3=[1,4]  2::3=[2,5]  :-1:3=[0,3]  3::3=[3,6]
+	  axis-1 (10 elements): :-1:3=[0,3,6]  3::3=[3,6,9]  1::3=[1,4,7]  2::3=[2,5,8]
+	'''
+
+	def setUp(self) :
+		self.layer = SchneiderExpansionLayer(2, 3)
+		self.layer.cells_base.point_ID[:, :, -1] = np.arange(70).reshape(7, 10)
+		self.layer.setUpSingleCellGridPoints()
+
 	# ------------------------------------------------------------------ #
-	# Hat edges: both in {4,5,6,7}                                       #
+	# cells_hat — 8 vertex positions                                     #
 	# ------------------------------------------------------------------ #
 
-	def test_hat_edge_4_5_no_error(self) :
-		# Currently raises IndexError (6-element index on 5-D array)
-		ids = np.array([42, ])
-		self.layer.setEdgePointIDs(4, 5, ids)   # must not raise
+	def test_cells_hat_v000(self) :
+		# point_IDs[1::3, :-1:3] → rows [1,4], cols [0,3,6]
+		expected = np.array([[10, 13, 16], [40, 43, 46]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 0, 0, 0], expected)
 
-	def test_hat_edge_4_5_cells_hat(self) :
-		# Edge (4,5): axis 0, orientation +, n0-1=1 interior point
-		# v4=(0,0,-1): cells_hat[1:, 0, 0, 0, -1] should equal ids
-		# v5=(-1,0,-1): cells_hat[:-1, 0, -1, 0, -1] should equal ids
-		ids = np.array([42])
-		self.layer.setEdgePointIDs(4, 5, ids)
-		np.testing.assert_array_equal(
-			self.layer.cells_hat.point_ID[1:, 0, 0, 0, -1], ids
-		)
-		np.testing.assert_array_equal(
-			self.layer.cells_hat.point_ID[:-1, 0, -1, 0, -1], ids
-		)
+	def test_cells_hat_v100(self) :
+		# point_IDs[2::3, :-1:3] → rows [2,5], cols [0,3,6]
+		expected = np.array([[20, 23, 26], [50, 53, 56]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 1, 0, 0], expected)
 
-	def test_hat_edge_4_5_cells_base(self) :
-		# cells_base interior macro-point: slice(3,6,3)=[3] along axis 0,
-		# first column, last axis-2 → cells_base.point_ID[3, 0, -1] = 42
-		ids = np.array([42])
-		self.layer.setEdgePointIDs(4, 5, ids)
-		self.assertEqual(self.layer.cells_base.point_ID[3, 0, -1], 42)
+	def test_cells_hat_v010(self) :
+		# point_IDs[1::3, 3::3] → rows [1,4], cols [3,6,9]
+		expected = np.array([[13, 16, 19], [43, 46, 49]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 0, 1, 0], expected)
 
-	def test_hat_edge_4_5_cells_lateral0(self) :
-		# v4: vertex_map[4][0]=0 → cells_lateral[0]
-		# cells_lateral[0][1:, 0, 0, 0, -1] = ids
-		ids = np.array([42])
-		self.layer.setEdgePointIDs(4, 5, ids)
-		np.testing.assert_array_equal(
-			self.layer.cells_lateral[0].point_ID[1:, 0, 0, 0, -1], ids
-		)
+	def test_cells_hat_v110(self) :
+		# point_IDs[2::3, 3::3] → rows [2,5], cols [3,6,9]
+		expected = np.array([[23, 26, 29], [53, 56, 59]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 1, 1, 0], expected)
 
-	def test_hat_edge_4_7_no_error(self) :
-		# Edge (4,7): axis 1, n1-1=2 interior points
-		ids = np.array([10, 11])
-		self.layer.setEdgePointIDs(4, 7, ids)   # must not raise
+	def test_cells_hat_v001(self) :
+		# point_IDs[:-1:3, :-1:3] → rows [0,3], cols [0,3,6]
+		expected = np.array([[0, 3, 6], [30, 33, 36]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 0, 0, 1], expected)
 
-	def test_hat_edge_4_7_cells_hat(self) :
-		# v4=(0,0,-1): cells_hat[0, 1:, 0, 0, -1] = ids
-		# v7=(0,-1,-1): cells_hat[0, :-1, 0, -1, -1] = ids
-		ids = np.array([10, 11])
-		self.layer.setEdgePointIDs(4, 7, ids)
-		np.testing.assert_array_equal(
-			self.layer.cells_hat.point_ID[0, 1:, 0, 0, -1], ids
-		)
-		np.testing.assert_array_equal(
-			self.layer.cells_hat.point_ID[0, :-1, 0, -1, -1], ids
-		)
+	def test_cells_hat_v101(self) :
+		# point_IDs[3::3, :-1:3] → rows [3,6], cols [0,3,6]
+		expected = np.array([[30, 33, 36], [60, 63, 66]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 1, 0, 1], expected)
 
-	def test_hat_edge_5_6_no_error(self) :
-		# Edge (5,6): axis 1, n1-1=2 interior points
-		# v5=(-1,0,-1), v6=(-1,-1,-1)
-		ids = np.array([20, 21])
-		self.layer.setEdgePointIDs(5, 6, ids)   # must not raise
+	def test_cells_hat_v011(self) :
+		# point_IDs[:-1:3, 3::3] → rows [0,3], cols [3,6,9]
+		expected = np.array([[3, 6, 9], [33, 36, 39]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 0, 1, 1], expected)
 
-	def test_hat_edge_7_6_no_error(self) :
-		# Edge (7,6): axis 0, n0-1=1 interior point
-		# v7=(0,-1,-1), v6=(-1,-1,-1)
-		ids = np.array([99])
-		self.layer.setEdgePointIDs(7, 6, ids)   # must not raise
+	def test_cells_hat_v111(self) :
+		# point_IDs[3::3, 3::3] → rows [3,6], cols [3,6,9]
+		expected = np.array([[33, 36, 39], [63, 66, 69]])
+		np.testing.assert_array_equal(self.layer.cells_hat.point_ID[:, :, 1, 1, 1], expected)
+
+	# ------------------------------------------------------------------ #
+	# cells_hidden — final state (lines 69-71 overwrite lines 65-67)     #
+	# ------------------------------------------------------------------ #
+
+	def test_cells_hidden_v000(self) :
+		# point_IDs[1::3, 1::3] → rows [1,4], cols [1,4,7]  (not overwritten)
+		expected = np.array([[11, 14, 17], [41, 44, 47]])
+		np.testing.assert_array_equal(self.layer.cells_hidden.point_ID[:, :, 0, 0, 0], expected)
+
+	def test_cells_hidden_v100_overwritten(self) :
+		# line 65 (rows[2,5], cols[1,4,7]) overwritten by line 69 (rows[2,5], cols[0,3,6])
+		expected = np.array([[20, 23, 26], [50, 53, 56]])
+		np.testing.assert_array_equal(self.layer.cells_hidden.point_ID[:, :, 1, 0, 0], expected)
+
+	def test_cells_hidden_v010_overwritten(self) :
+		# line 66 (rows[1,4], cols[2,5,8]) overwritten by line 70 (rows[1,4], cols[3,6,9])
+		expected = np.array([[13, 16, 19], [43, 46, 49]])
+		np.testing.assert_array_equal(self.layer.cells_hidden.point_ID[:, :, 0, 1, 0], expected)
+
+	def test_cells_hidden_v110_overwritten(self) :
+		# line 67 (rows[2,5], cols[2,5,8]) overwritten by line 71 (rows[2,5], cols[3,6,9])
+		expected = np.array([[23, 26, 29], [53, 56, 59]])
+		np.testing.assert_array_equal(self.layer.cells_hidden.point_ID[:, :, 1, 1, 0], expected)
+
+	def test_cells_hidden_v001(self) :
+		# point_IDs[1::3, :-1:3] → rows [1,4], cols [0,3,6]
+		expected = np.array([[10, 13, 16], [40, 43, 46]])
+		np.testing.assert_array_equal(self.layer.cells_hidden.point_ID[:, :, 0, 0, 1], expected)
+
+	def test_cells_hidden_v101_v011_v111_unset(self) :
+		# These three vertex positions are never assigned by setUpSingleCellGridPoints
+		for idx in [(1, 0, 1), (0, 1, 1), (1, 1, 1)] :
+			np.testing.assert_array_equal(
+				self.layer.cells_hidden.point_ID[:, :, idx[0], idx[1], idx[2]],
+				np.full((2, 3), -1),
+				err_msg=f'vertex {idx} should remain -1'
+			)
+
+	# ------------------------------------------------------------------ #
+	# cells_lateral[0]                                                   #
+	# ------------------------------------------------------------------ #
+
+	def test_cells_lateral0_v000(self) :
+		# point_IDs[:-1:3, 1::3] → rows [0,3], cols [1,4,7]
+		expected = np.array([[1, 4, 7], [31, 34, 37]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 0, 0, 0], expected)
+
+	def test_cells_lateral0_v100(self) :
+		# point_IDs[1::3, 1::3] → rows [1,4], cols [1,4,7]
+		expected = np.array([[11, 14, 17], [41, 44, 47]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 1, 0, 0], expected)
+
+	def test_cells_lateral0_v010(self) :
+		# point_IDs[:-1:3, 2::3] → rows [0,3], cols [2,5,8]
+		expected = np.array([[2, 5, 8], [32, 35, 38]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 0, 1, 0], expected)
+
+	def test_cells_lateral0_v110(self) :
+		# point_IDs[1::3, 1::3] → rows [1,4], cols [1,4,7]  (same source as v100)
+		expected = np.array([[11, 14, 17], [41, 44, 47]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 1, 1, 0], expected)
+
+	def test_cells_lateral0_v001(self) :
+		# point_IDs[:-1:3, :-1:3] → rows [0,3], cols [0,3,6]
+		expected = np.array([[0, 3, 6], [30, 33, 36]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 0, 0, 1], expected)
+
+	def test_cells_lateral0_v101(self) :
+		# point_IDs[1::3, :-1:3] → rows [1,4], cols [0,3,6]
+		expected = np.array([[10, 13, 16], [40, 43, 46]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 1, 0, 1], expected)
+
+	def test_cells_lateral0_v011(self) :
+		# point_IDs[:-1:3, 3::3] → rows [0,3], cols [3,6,9]
+		expected = np.array([[3, 6, 9], [33, 36, 39]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 0, 1, 1], expected)
+
+	def test_cells_lateral0_v111(self) :
+		# point_IDs[1::3, 3::3] → rows [1,4], cols [3,6,9]
+		expected = np.array([[13, 16, 19], [43, 46, 49]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[0].point_ID[:, :, 1, 1, 1], expected)
+
+	# ------------------------------------------------------------------ #
+	# cells_lateral[1]                                                   #
+	# ------------------------------------------------------------------ #
+
+	def test_cells_lateral1_v000(self) :
+		# point_IDs[2::3, 1::3] → rows [2,5], cols [1,4,7]
+		expected = np.array([[21, 24, 27], [51, 54, 57]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 0, 0, 0], expected)
+
+	def test_cells_lateral1_v100(self) :
+		# point_IDs[3::3, 1::3] → rows [3,6], cols [1,4,7]
+		expected = np.array([[31, 34, 37], [61, 64, 67]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 1, 0, 0], expected)
+
+	def test_cells_lateral1_v010(self) :
+		# point_IDs[2::3, 2::3] → rows [2,5], cols [2,5,8]
+		expected = np.array([[22, 25, 28], [52, 55, 58]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 0, 1, 0], expected)
+
+	def test_cells_lateral1_v110(self) :
+		# point_IDs[3::3, 1::3] → rows [3,6], cols [1,4,7]  (same source as v100)
+		expected = np.array([[31, 34, 37], [61, 64, 67]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 1, 1, 0], expected)
+
+	def test_cells_lateral1_v001(self) :
+		# point_IDs[2::3, :-1:3] → rows [2,5], cols [0,3,6]
+		expected = np.array([[20, 23, 26], [50, 53, 56]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 0, 0, 1], expected)
+
+	def test_cells_lateral1_v101(self) :
+		# point_IDs[3::3, :-1:3] → rows [3,6], cols [0,3,6]
+		expected = np.array([[30, 33, 36], [60, 63, 66]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 1, 0, 1], expected)
+
+	def test_cells_lateral1_v011(self) :
+		# point_IDs[2::3, 3::3] → rows [2,5], cols [3,6,9]
+		expected = np.array([[23, 26, 29], [53, 56, 59]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 0, 1, 1], expected)
+
+	def test_cells_lateral1_v111(self) :
+		# point_IDs[3::3, 3::3] → rows [3,6], cols [3,6,9]
+		expected = np.array([[33, 36, 39], [63, 66, 69]])
+		np.testing.assert_array_equal(self.layer.cells_lateral[1].point_ID[:, :, 1, 1, 1], expected)
 
 
 if __name__ == '__main__' :
