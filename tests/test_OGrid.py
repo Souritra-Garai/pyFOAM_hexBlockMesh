@@ -161,7 +161,7 @@ class TestOGrid(unittest.TestCase) :
 					face_collection, points, cell_centers
 				))
 
-		test_path = Path('test_polyMesh_OGrid')
+		test_path = Path(__file__).parent / 'test_polyMesh_OGrid'
 		if test_path.exists() :
 			for item in test_path.iterdir() :
 				item.unlink()

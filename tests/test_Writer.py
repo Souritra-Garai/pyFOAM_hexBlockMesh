@@ -13,7 +13,7 @@ class TestWriter(unittest.TestCase) :
 		Test the write method
 		'''
 
-		test_path = Path('test_polyMesh')
+		test_path = Path(__file__).parent / 'test_polyMesh'
 		if (test_path / 'points').exists() :
 			for item in test_path.iterdir() :
 				item.unlink()
@@ -42,7 +42,7 @@ class TestWriter(unittest.TestCase) :
 		Test the write method
 		'''
 
-		test_path = Path('test_polyMesh')
+		test_path = Path(__file__).parent / 'test_polyMesh'
 		if test_path.exists() :
 			for item in test_path.iterdir() :
 				item.unlink()
