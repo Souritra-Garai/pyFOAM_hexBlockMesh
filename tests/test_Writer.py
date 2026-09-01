@@ -1,6 +1,6 @@
+import unittest
 from pathlib import Path
 
-import unittest
 import numpy as np
 
 from pyFOAM_hexBlockMesh.FaceCollection import FlatFaceCollection
@@ -14,8 +14,8 @@ class TestWriter(unittest.TestCase) :
 		'''
 
 		test_path = Path('test_polyMesh')
-		if (test_path / 'points').exists():
-			for item in test_path.iterdir():
+		if (test_path / 'points').exists() :
+			for item in test_path.iterdir() :
 				item.unlink()
 			test_path.rmdir()
 		test_path.mkdir(parents=True, exist_ok=True)
@@ -43,8 +43,8 @@ class TestWriter(unittest.TestCase) :
 		'''
 
 		test_path = Path('test_polyMesh')
-		if test_path.exists():
-			for item in test_path.iterdir():
+		if test_path.exists() :
+			for item in test_path.iterdir() :
 				item.unlink()
 			test_path.rmdir()
 		test_path.mkdir(parents=True, exist_ok=True)
@@ -66,6 +66,7 @@ class TestWriter(unittest.TestCase) :
 
 		pass
 
+
 if __name__ == '__main__' :
-	
+
 	unittest.main()
